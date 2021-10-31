@@ -26,13 +26,16 @@ const {
 } = require(path.join(basePath, "/src/config.js"));
 const canvas = createCanvas(format.width, format.height);
 const ctx = canvas.getContext("2d");
+const PixelsJS = require("./Pixels");
+
 var metadataList = [];
 var attributesList = [];
 var dnaList = [];
 
 const buildSetup = () => {
   if (fs.existsSync(buildDir)) {
-    fs.rmdirSync(buildDir, { recursive: true });
+    // fs.rmdirSync(buildDir, { recursive: true });
+    fs.rmSync(buildDir, { recursive: true, force: true })
   }
   fs.mkdirSync(buildDir);
   fs.mkdirSync(path.join(buildDir, "/json"));
@@ -89,6 +92,8 @@ const layersSetup = (layersOrder) => {
 };
 
 const saveImage = (_editionCount) => {
+  // applyFilter();
+  // applyHueShift();
   fs.writeFileSync(
     `${buildDir}/images/${_editionCount}.png`,
     canvas.toBuffer("image/png")
@@ -117,7 +122,7 @@ const addMetadata = (_dna, _edition) => {
     date: dateTime,
     ...extraMetadata,
     attributes: attributesList,
-    compiler: "HashLips Art Engine",
+    compiler: "Freddy's Custom Art Engine",
   };
   metadataList.push(tempMetadata);
   attributesList = [];
@@ -141,6 +146,8 @@ const loadLayerImg = async (_layer) => {
 const drawElement = (_renderObject) => {
   ctx.globalAlpha = _renderObject.layer.opacity;
   ctx.globalCompositeOperation = _renderObject.layer.blendMode;
+  // console.log('_renderObject', _renderObject);
+  
   ctx.drawImage(_renderObject.loadedImage, 0, 0, format.width, format.height);
   addAttributes(_renderObject);
 };
@@ -216,6 +223,75 @@ function shuffle(array) {
     ];
   }
   return array;
+}
+
+function applyHueShift() {
+      // adjust hue
+      const hueshifts=[0, 50, 100, 150, 200];
+      const rand = Math.floor(Math.random() * hueshifts.length);
+      
+      const deg = Math.PI / 180;
+
+    function rotateRGBHue(r, g, b, hue) {
+      const cosA = Math.cos(hue * deg);
+      const sinA = Math.sin(hue * deg);
+      const neo = [
+        cosA + (1 - cosA) / 3,
+        (1 - cosA) / 3 - Math.sqrt(1 / 3) * sinA,
+        (1 - cosA) / 3 + Math.sqrt(1 / 3) * sinA,
+      ];
+      const result = [
+        r * neo[0] + g * neo[1] + b * neo[2],
+        r * neo[2] + g * neo[0] + b * neo[1],
+        r * neo[1] + g * neo[2] + b * neo[0],
+      ];
+      return result.map(x => uint8(x));
+    }
+
+    function uint8(value) {
+      return 0 > value ? 0 : (255 < value ? 255 : Math.round(value));
+    }
+
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    var i;
+    for (i = 0; i < imgData.data.length; i += 4) {
+      const rotated = rotateRGBHue(imgData.data[i], imgData.data[i+1], imgData.data[i+2], hueshifts[rand])
+
+      imgData.data[i] = rotated[0];
+      imgData.data[i + 1] = rotated[1];
+      imgData.data[i + 2] = rotated[2];
+      imgData.data[i + 3] = 255;
+    }
+
+    ctx.putImageData(imgData, 0, 0);
+}
+
+function applyFilter() {
+  const filters=[
+    "offset",
+    "ryo",
+    "offset_blue",
+    "offset_green",
+    "invert"
+  ];
+  const rand = Math.floor(Math.random() * filters.length);
+  console.log('rand', rand);
+  console.log('filters[rand]', filters[rand]);
+  
+  let newImgData = PixelsJS.filterImgData(ctx.getImageData(0, 0, canvas.width, canvas.height), filters[rand]);
+  ctx.putImageData(newImgData, 0, 0);
+// const rand = Math.random() * 255;
+// let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+//   // invert colors
+// var i;
+// for (i = 0; i < imgData.data.length; i += 4) {
+//   imgData.data[i] = rand-imgData.data[i];
+//   imgData.data[i + 1] = rand-imgData.data[i + 1];
+//   imgData.data[i + 2] = rand-imgData.data[i + 2];
+//   imgData.data[i + 3] = 255;
+// }
+
+// ctx.putImageData(imgData, 0, 0);
 }
 
 const startCreating = async () => {

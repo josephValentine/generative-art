@@ -5,7 +5,7 @@ const isLocal = typeof process.pkg === "undefined";
 const basePath = isLocal ? process.cwd() : path.dirname(process.execPath);
 const { startCreating, buildSetup } = require(path.join(
   basePath,
-  "/src/main.js"
+  "/src/main-moon.js"
 ));
 
 (() => {

@@ -10,15 +10,16 @@ const baseUri = "ipfs://NewUriToReplace";
 
 const layerConfigurations = [
   {
-    growEditionSizeTo: 10,
+    growEditionSizeTo: 42,
     layersOrder: [
+      { name: "sky" },
       { name: "Background" },
-      { name: "Eyeball" },
-      { name: "Eye color" },
-      { name: "Iris" },
-      { name: "Shine" },
-      { name: "Bottom lid" },
-      { name: "Top lid" },
+      { name: "left" },
+      { name: "right" },
+      { name: "middle" },
+      { name: "giver" },
+      { name: "object" },
+      { name: "Foreground" },
     ],
   },
 ];
@@ -28,8 +29,8 @@ const shuffleLayerConfigurations = false;
 const debugLogs = false;
 
 const format = {
-  width: 512,
-  height: 512,
+  width: 1668,
+  height: 2224,
 };
 
 const background = {

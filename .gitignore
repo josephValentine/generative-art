@@ -53,6 +53,8 @@ build/
 dist/
 node_modules/
 jspm_packages/
+layers/
+layers-moon/
 
 # TypeScript v1 declaration files
 
@@ -140,3 +142,5 @@ dist
 # OSX
 
 .DS_Store
+src/config-moon.js
+src/main-moon.js
